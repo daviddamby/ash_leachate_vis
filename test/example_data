@@ -1,0 +1,6 @@
+Sample,Element,Value,MagmaType,Method
+S1,Fe,120,Andesite,RatioA
+S1,Al,35,Andesite,RatioA
+S2,Fe,90,Rhyolite,RatioB
+S3,Mn,0.9,Basalt,RatioC
+S4,Zn,0.12,Dacite,RatioA
