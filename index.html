@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Volcanic Ash Leachate Visualizer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  style.css
+  https://cdn.plot.ly/plotly-2.32.0.min.js</script>
+  https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js</script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">Volcanic Ash Leachate Visualizer</div>
+    <nav class="nav">
+      #aboutAbout</a>
+      #exampleExample Data</a>
+      #methodsMethods</a>
+    </nav>
+  </header>
+
+  <main class="container">
+
+    <!-- Dataset badge and palette selector -->
+    <section class="meta card">
+      <div class="badge-row">
+        <div id="datasetBadge" class="badge">
+          Dataset: <span id="badgeName">—</span> • Version: <span id="badgeVersion">—</span>
+        </div>
+        <div class="controls-inline">
+          <label for="paletteSel">Palette:</label>
+          <select id="paletteSel">
+            <option value="okabeIto">Colorblind-safe (Okabe–Ito)</option>
+            <option value="classic">Classic</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Upload/paste -->
+    <section class="card">
+      <h2>1) Input your data</h2>
+      <p>Provide leachate data with columns:
+        <code>Sample</code>, <code>Element</code>,
+        <code>Value</code> or <code>Min</code>/<code>Max</code>,
+        <code>MagmaType</code>, <code>Method</code>.
+      </p>
+
+      <div class="input-grid">
+        <div>
+          <label for="file">Upload CSV</label>
+          <input id="file" type="file" accept=".csv" />
+        </div>
+        <div>
+          <label for="paste">— or paste your data</label>
+          <textarea id="paste" rows="8"></textarea>
+          <button id="loadPaste">Load Pasted Data</button>
+        </div>
+      </div>
+
+      <div id="preview" class="preview">No data loaded yet.</div>
+    </section>
+
+    <!-- Filters -->
+    <section class="card">
+      <h2>2) Choose filters</h2>
+      <div class="filters">
+        <div>
+          <label for="compFilter">Magmatic composition</label>
+          <select id="compFilter">
+            <option value="All">All</option>
+            <option value="Basalt">Basalt</option>
+            <option value="Basaltic andesite">Basaltic andesite</option>
+            <option value="Andesite">Andesite</option>
+            <option value="Dacite">Dacite</option>
+            <option value="Rhyolite">Rhyolite</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="methodFilter">Leachate method</label>
+          <select id="methodFilter">
+            <option value="All">All</option>
+            <option value="RatioA">RatioA</option>
+            <option value="RatioB">RatioB</option>
+            <option value="RatioC">RatioC</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="orderFilter">Element order</label>
+          <select id="orderFilter">
+            <option value="alpha">A → Z</option>
+            <option value="revAlpha">Z → A</option>
+            <option value="globalMedian">By global median</option>
+            <option value="userValue">By user value</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <!-- Plots -->
+    <section class="card">
+      <h2>3) Generate plots</h2>
+
+      <div class="actions">
+        <button id="generate">Generate Figure</button>
+
+        <label class="inline">
+          <input type="checkbox" id="useLinear" />
+          Use linear scale (absolute plot)
+        </label>
+      </div>
+
+      <div class="plots">
+        <div class="plot-block">
+          <h3>Normalized plot</h3>
+          <div id="plotNormalized" class="plot"></div>
+          <button id="dlNorm">Download PNG</button>
+        </div>
+
+        <div class="plot-block">
+          <h3>Absolute values (<span id="absScaleLabel">log</span> scale)</h3>
+          <div id="plotAbsolute" class="plot"></div>
+          <button id="dlAbs">Download PNG</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Methods output -->
+    <section class="card">
+      <h2>4) Methods summary</h2>
+      <textarea id="methodsOut" rows="6" readonly></textarea>
+      <button id="copyMethods">Copy to clipboard</button>
+    </section>
+
+    <section id="about" class="card">
+      <h2>About</h2>
+      <p>This tool compares user-supplied volcanic ash leachate values to a global reference dataset.</p>
+    </section>
+
+    <section id="example" class="card">
+      <h2>Example Data</h2>
+      <p>See files in the <code>example/</code> folder.</p>
+    </section>
+
+    <section id="methods" class="card">
+      <h2>Methods</h2>
+      <p>Normalized positions = (value − min) / (max − min).</p>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <small>© Volcanic Health / IVHHN partners — All computation runs client‑side.</small>
+  </footer>
+
+  app.js</script>
+</body>
+</html>
