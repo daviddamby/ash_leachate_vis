@@ -1,3 +1,4 @@
+
 /* -------------------------------------------------------------
    CONFIG
 ------------------------------------------------------------- */
@@ -27,7 +28,7 @@ let USER_ROWS = [];
 
 
 /* -------------------------------------------------------------
-   LOAD GLOBAL STATS + UPDATE BADGE
+   LOAD GLOBAL STATS
 ------------------------------------------------------------- */
 
 async function loadGlobalStats() {
@@ -58,7 +59,7 @@ function mapColumns(row) {
     else if (lower === 'value') mapped.Value = parseFloat(val);
     else if (lower === 'min') mapped.Min = parseFloat(val);
     else if (lower === 'max') mapped.Max = parseFloat(val);
-    else if (lower === 'magmatype' || lower === 'magma' || lower === 'composition')
+    else if (['magmatype','magma','composition'].includes(lower))
       mapped.MagmaType = String(val).trim();
     else if (lower === 'method') mapped.Method = String(val).trim();
     else mapped[key] = val;
@@ -69,6 +70,7 @@ function mapColumns(row) {
 function parseFile(file) {
   return new Promise(resolve => {
     Papa.parse(file, {
+      download: false,        // IMPORTANT FIX
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
@@ -81,6 +83,7 @@ function parseFile(file) {
 function parsePaste(text) {
   return new Promise(resolve => {
     Papa.parse(text, {
+      download: false,        // IMPORTANT FIX
       header: true,
       dynamicTyping: true,
       skipEmptyLines: true,
@@ -116,7 +119,7 @@ function renderPreview(rows) {
 
 
 /* -------------------------------------------------------------
-   GET GLOBAL STAT BLOCK (best match)
+   GLOBAL STATS ACCESS
 ------------------------------------------------------------- */
 
 function getStats(element, comp, method) {
@@ -138,7 +141,7 @@ function getStats(element, comp, method) {
 
 
 /* -------------------------------------------------------------
-   ELEMENT SORTING
+   ELEMENT ORDERING
 ------------------------------------------------------------- */
 
 function orderElements(elements, rows, comp, method, orderMode) {
@@ -146,7 +149,6 @@ function orderElements(elements, rows, comp, method, orderMode) {
 
   for (const el of elements) {
     const stats = getStats(el, comp, method);
-
     const vals = rows
       .filter(r => r.Element === el && isFinite(r.Value))
       .map(r => r.Value);
@@ -182,7 +184,7 @@ function orderElements(elements, rows, comp, method, orderMode) {
 
 
 /* -------------------------------------------------------------
-   NORMALIZED PLOT
+   PLOTS (Normalized + Absolute)
 ------------------------------------------------------------- */
 
 function buildNormalizedTraces(rows, comp, method, orderMode) {
@@ -228,18 +230,15 @@ function buildNormalizedTraces(rows, comp, method, orderMode) {
     const maxNorm = ((uMax - gmin)/range)*100;
     const medNorm = ((gmed - gmin)/range)*100;
 
-    // Range
     traces.push({
       type: 'scatter',
       mode: 'lines',
       line: { width: 12, color: currentPalette.userRange },
       x: [minNorm, maxNorm],
       y: [el, el],
-      name: 'Your range',
-      hovertemplate: `${el}<br>Your range: ${minNorm.toFixed(1)}–${maxNorm.toFixed(1)} %<extra></extra>`
+      name: 'Your range'
     });
 
-    // Points
     if (vals.length) {
       traces.push({
         type: 'scatter',
@@ -247,20 +246,17 @@ function buildNormalizedTraces(rows, comp, method, orderMode) {
         marker: { size: 8, color: currentPalette.userValues },
         x: vals.map(v=>((v-gmin)/range)*100),
         y: vals.map(()=>el),
-        name: 'Your value(s)',
-        hovertemplate: `${el}<br>Your value: %{x:.1f} %<extra></extra>`
+        name: 'Your value(s)'
       });
     }
 
-    // Global median
     traces.push({
       type: 'scatter',
       mode: 'markers',
       marker: { size: 10, color: currentPalette.globalMedian, symbol: 'diamond' },
       x: [medNorm],
       y: [el],
-      name: 'Global median',
-      hovertemplate: `${el}<br>Global median: ${gmed}<extra></extra>`
+      name: 'Global median'
     });
   }
 
@@ -270,17 +266,12 @@ function buildNormalizedTraces(rows, comp, method, orderMode) {
     yaxis: { type: 'category', autorange: 'reversed' },
     plot_bgcolor: '#0c1425',
     paper_bgcolor: '#0c1425',
-    hovermode: 'closest',
     margin: { l:120, r:20, t:40, b:50 }
   };
 
   return { traces, layout };
 }
 
-
-/* -------------------------------------------------------------
-   ABSOLUTE PLOT
-------------------------------------------------------------- */
 
 function buildAbsoluteTraces(rows, comp, method, useLinear, orderMode) {
   const byEl = new Map();
@@ -318,18 +309,15 @@ function buildAbsoluteTraces(rows, comp, method, useLinear, orderMode) {
 
     if (!isFinite(uMin) && !isFinite(uMax)) continue;
 
-    // Global range
     traces.push({
       type: 'scatter',
       mode: 'lines',
       line: { width: 12, color: currentPalette.globalRange },
       x: [gmin, gmax],
       y: [el, el],
-      name: 'Global range',
-      hovertemplate: `${el}<br>Global range: ${gmin}–${gmax}<extra></extra>`
+      name: 'Global range'
     });
 
-    // User range
     if (isFinite(uMin) && isFinite(uMax)) {
       traces.push({
         type: 'scatter',
@@ -337,12 +325,10 @@ function buildAbsoluteTraces(rows, comp, method, useLinear, orderMode) {
         line: { width: 12, color: currentPalette.userRange },
         x: [uMin, uMax],
         y: [el, el],
-        name: 'Your range',
-        hovertemplate: `${el}<br>Your range: ${uMin}–${uMax}<extra></extra>`
+        name: 'Your range'
       });
     }
 
-    // User values
     if (vals.length) {
       traces.push({
         type: 'scatter',
@@ -350,20 +336,17 @@ function buildAbsoluteTraces(rows, comp, method, useLinear, orderMode) {
         marker: { size: 8, color: currentPalette.userValues },
         x: vals,
         y: vals.map(()=>el),
-        name: 'Your value(s)',
-        hovertemplate: `${el}<br>Your value: %{x}<extra></extra>`
+        name: 'Your value(s)'
       });
     }
 
-    // Median
     traces.push({
       type: 'scatter',
       mode: 'markers',
       marker: { size: 10, color: currentPalette.globalMedian, symbol:'diamond' },
       x: [gmed],
       y: [el],
-      name: 'Global median',
-      hovertemplate: `${el}<br>Global median: ${gmed}<extra></extra>`
+      name: 'Global median'
     });
   }
 
@@ -376,7 +359,6 @@ function buildAbsoluteTraces(rows, comp, method, useLinear, orderMode) {
     yaxis: { type: 'category', autorange: 'reversed' },
     plot_bgcolor: '#0c1425',
     paper_bgcolor: '#0c1425',
-    hovermode: 'closest',
     margin: { l:120, r:20, t:40, b:50 }
   };
 
@@ -385,7 +367,7 @@ function buildAbsoluteTraces(rows, comp, method, useLinear, orderMode) {
 
 
 /* -------------------------------------------------------------
-   METHODS PARAGRAPH
+   METHODS TEXT
 ------------------------------------------------------------- */
 
 function buildMethodsText(rows, comp, method) {
@@ -407,7 +389,7 @@ All computation was performed entirely in the browser; no data were uploaded or 
 
 
 /* -------------------------------------------------------------
-   MAIN EVENT BINDINGS
+   MAIN
 ------------------------------------------------------------- */
 
 async function main() {
@@ -436,7 +418,8 @@ async function main() {
   const useLinearChk = document.getElementById('useLinear');
   const absScaleLabel = document.getElementById('absScaleLabel');
 
-  /* --- INPUT HANDLERS --- */
+
+  /* ---------------- INPUT HANDLERS ---------------- */
 
   fileInput.addEventListener('change', async e => {
     const file = e.target.files[0];
@@ -457,7 +440,8 @@ async function main() {
     absScaleLabel.innerText = useLinearChk.checked ? 'linear' : 'log';
   });
 
-  /* --- GENERATE PLOTS --- */
+
+  /* ---------------- GENERATE PLOTS ---------------- */
 
   genBtn.addEventListener('click', async () => {
     if (!USER_ROWS.length) {
@@ -479,7 +463,8 @@ async function main() {
     methodsOut.value = buildMethodsText(USER_ROWS, comp, method);
   });
 
-  /* --- DOWNLOAD BUTTONS --- */
+
+  /* ---------------- DOWNLOAD ---------------- */
 
   dlNorm.addEventListener('click', () => {
     Plotly.downloadImage(plotNorm, {format:'png', filename:'leachate_normalized'});
@@ -489,7 +474,8 @@ async function main() {
     Plotly.downloadImage(plotAbs, {format:'png', filename:'leachate_absolute'});
   });
 
-  /* --- COPY METHODS --- */
+
+  /* ---------------- COPY METHODS ---------------- */
 
   copyBtn.addEventListener('click', async () => {
     try {
