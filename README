@@ -33,40 +33,14 @@ Example datasets are located in the `example/` folder.
 ## Global Dataset File
 The global reference dataset is stored in:
 
-
 data/global_leachate_stats.json
 
 This file contains:
 - The database name
-- A version string (you can update this later)
+- A version string
 - Min, median, max for each element
 - Optional branching by magma composition and/or leachate method
 
-Replace this file with your finalized database when ready.
-
----
-
-## Deploy on GitHub Pages
-1. Open your repository on GitHub.
-2. Go to Settings → Pages.
-3. Under “Build and deployment”, set:
-   - Source: Deploy from a branch
-   - Branch: main
-   - Folder: /(root)
-4. Save changes.
-5. After ~1 minute, your site will appear at:
-
-
-https://YOUR_USERNAME.github.io/ash-leachate-tool/
-
----
-
-## Embedding in a Drupal/IVHHN Website
-Ask the site admin to whitelist your GitHub Pages domain in their Content Security Policy (frame-src), then embed using:
-
-
-
-  https://YOUR_USERNAME.github.io/ash-leachate-tool/
-  
+https://daviddamby.github.io/ash-leachate-tool/
 
 ```
